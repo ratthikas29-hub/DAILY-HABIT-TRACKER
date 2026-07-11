@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Categories — HabitFlow</title>
+  <meta name="description" content="Choose from curated habit categories to build your personalized routine.">
+  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#14B8A6">
+  <style>
+    .category-hero {display:grid;gap:1rem;margin-bottom:1.1rem;padding:1rem 0;}
+    .category-hero h2 {margin:.2rem 0;font-size:clamp(1.8rem,5vw,2.4rem);line-height:1.05;color:var(--text);}
+    .category-hero p {margin:.4rem 0 0;color:var(--text-secondary);max-width:44rem;}
+    .search-panel {display:grid;gap:.9rem;margin:1.15rem 0;}
+    .search-input {width:100%;border:1px solid var(--glass-border);border-radius:12px;background:var(--card-bg);color:var(--text);padding:0.9rem 1rem;outline:none;box-shadow:inset 0 1px 2px rgba(2,6,23,0.04);}
+    .filter-chips {display:flex;flex-wrap:wrap;gap:.65rem;margin-top:.75rem;}
+    .filter-chip {border:1px solid var(--glass-border);background:rgba(2,6,23,0.02);color:var(--text-secondary);padding:.6rem .9rem;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:.45rem;transition:background .18s ease,border-color .18s ease;}
+    .filter-chip.active {background:linear-gradient(135deg,rgba(20,184,166,0.12),rgba(14,165,233,0.06));border-color:var(--primary);color:var(--text);}
+    .filter-chip span:last-child {font-size:.95rem;}
+    .category-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;}
+    .habit-card {background:var(--card-bg);border:1px solid var(--glass-border);border-radius:14px;padding:1rem;box-shadow:var(--shadow-soft);display:grid;gap:.9rem;}
+    .habit-card-header {display:flex;justify-content:space-between;align-items:flex-start;gap:.85rem;}
+    .category-pill {display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .65rem;border-radius:999px;font-size:.85rem;color:var(--text-secondary);background:rgba(2,6,23,0.04);}
+    .habit-card h3 {margin:.15rem 0;line-height:1.15;font-size:1.05rem;color:var(--text);}
+    .habit-desc {margin:0;color:var(--text-secondary);font-size:.95rem;line-height:1.5;min-height:3rem;}
+    .habit-card-footer {display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap;}
+    .add-habit-btn {flex:1 1 auto;min-width:140px;background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;color:var(--white);padding:.75rem .9rem;border-radius:12px;font-weight:700;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;}
+    .add-habit-btn:hover {transform:translateY(-2px) scale(1.02);box-shadow:0 14px 30px rgba(20,184,166,0.08);}
+    .no-results {padding:1.25rem;border-radius:12px;background:var(--card-bg);border:1px solid var(--glass-border);text-align:center;color:var(--text-secondary);}
+    .no-results h3 {margin:0 0 .6rem;font-size:1.2rem;color:var(--text);}
+    .no-results p {margin:0;font-size:.95rem;line-height:1.6;color:var(--text-secondary);}
+    .illustration-panel {display:flex;justify-content:center;margin-top:1rem;}
+    .illustration-panel img {width:100%;max-width:420px;border-radius:12px;box-shadow:0 20px 48px rgba(2,6,23,0.08);}
+    @media (max-width:720px) {.habit-card-footer{flex-direction:column;align-items:stretch;}.category-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body class="page-categories">
+
+  <main class="page-shell">
+    <section class="category-panel anim-fade-up delay-1">
+      <div class="category-hero">
+        <div>
+          <h2>Build your perfect habit routine</h2>
+          <p>Search and filter premium habits by category, then add the ones you want to track daily.</p>
+        </div>
+        <div class="illustration-panel">
+          <img src="assets/illustrations/train img.png" alt="Habit selection illustration">
+        </div>
+      </div>
+
+      <div class="search-panel">
+        <input id="habit-search" class="search-input" type="search" placeholder="Search habits by name or focus" aria-label="Search habits">
+        <div id="category-filters" class="filter-chips"></div>
+      </div>
+
+      <div id="habits-container" class="category-grid"></div>
+    </section>
+  </main>
+
+  <script src="habits-data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const categories = [
+        {key:'all', label:'All', icon:'✨'},
+        {key:'health', label:'Health & Wellness', icon:'💧'},
+        {key:'fitness', label:'Fitness', icon:'🏃'},
+        {key:'learning', label:'Learning', icon:'📚'},
+        {key:'mindfulness', label:'Mindfulness', icon:'🧘'},
+        {key:'productivity', label:'Productivity', icon:'💼'},
+        {key:'sleep', label:'Sleep', icon:'🌙'}
+      ];
+
+      const container = document.getElementById('habits-container');
+      const filtersEl = document.getElementById('category-filters');
+      const searchInput = document.getElementById('habit-search');
+      let activeCategory = 'all';
+      let searchTerm = '';
+
+      const allHabits = typeof getAllHabits === 'function' ? getAllHabits() : (window.habitsData ? [...(habitsData.basic || []), ...(habitsData.premium || [])] : []);
+      const userHabits = typeof getUserHabits === 'function' ? getUserHabits() : (JSON.parse(localStorage.getItem('userHabits')) || []);
+      const addedIds = new Set(userHabits.map(h => h.id));
+      let availableHabits = allHabits.filter(habit => !addedIds.has(habit.id));
+
+      function getCategoryLabel(category) {
+        const match = categories.find(cat => cat.key === category);
+        return match ? match.label : category.charAt(0).toUpperCase() + category.slice(1);
+      }
+
+      function getCategoryIcon(category) {
+        const match = categories.find(cat => cat.key === category);
+        return match ? match.icon : '🔖';
+      }
+
+      function renderFilters() {
+        filtersEl.innerHTML = categories.map(cat => `
+          <button type="button" class="filter-chip ${cat.key === activeCategory ? 'active' : ''}" data-filter="${cat.key}">
+            <span>${cat.icon}</span><span>${cat.label}</span>
+          </button>
+        `).join('');
+      }
+
+      function renderHabits() {
+        const filtered = availableHabits.filter(habit => {
+          const matchesCategory = activeCategory === 'all' || habit.category === activeCategory;
+          const term = searchTerm.trim().toLowerCase();
+          const matchesSearch = !term || habit.name.toLowerCase().includes(term) || (habit.description || '').toLowerCase().includes(term);
+          return matchesCategory && matchesSearch;
+        });
+
+        if (!filtered.length) {
+          container.innerHTML = `
+            <div class="no-results">
+              <h3>No habits match your selection yet.</h3>
+              <p>Try a different search or choose another category to discover habits you can add.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = filtered.map(habit => `
+          <article class="habit-card glass-card" data-habit="${habit.id}">
+            <div class="habit-card-header">
+              <span class="category-pill"><span>${getCategoryIcon(habit.category)}</span><span>${getCategoryLabel(habit.category)}</span></span>
+              <button type="button" class="add-habit-btn" data-habit="${habit.id}">Add Habit</button>
+            </div>
+            <div>
+              <h3>${habit.name}</h3>
+              <p class="habit-desc">${habit.description || 'A focused habit to build a stronger routine.'}</p>
+            </div>
+            <div class="habit-card-footer">
+              <span class="category-pill">${getCategoryIcon(habit.category)} ${getCategoryLabel(habit.category)}</span>
+            </div>
+          </article>
+        `).join('');
+
+        container.querySelectorAll('.add-habit-btn').forEach(button => {
+          button.addEventListener('click', function () {
+            const habitId = this.dataset.habit;
+            const habit = allHabits.find(item => item.id === habitId);
+            if (!habit) return;
+            if (typeof addUserHabit === 'function') {
+              addUserHabit(habit);
+            } else {
+              const stored = JSON.parse(localStorage.getItem('userHabits') || '[]');
+              stored.push(habit);
+              localStorage.setItem('userHabits', JSON.stringify(stored));
+            }
+            availableHabits = availableHabits.filter(item => item.id !== habitId);
+            if (typeof showToast === 'function') {
+              showToast('Habit added', `${habit.name} is now ready to track.`, 'success');
+            }
+            setTimeout(() => {
+              window.location.href = 'daily-tracker.html';
+            }, 400);
+          });
+        });
+      }
+
+      renderFilters();
+      renderHabits();
+
+      filtersEl.addEventListener('click', function (event) {
+        const chip = event.target.closest('.filter-chip');
+        if (!chip) return;
+        activeCategory = chip.dataset.filter;
+        renderFilters();
+        renderHabits();
+      });
+
+      searchInput.addEventListener('input', function () {
+        searchTerm = this.value;
+        renderHabits();
+      });
+    });
+  </script>
+</body>
+</html>
