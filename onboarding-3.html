@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HabitFlow — Become Your Best Self</title>
+  <meta name="description" content="Consistency is the key to success. Build habits that transform your life." />
+  <link rel="icon" href="image/train img.png" type="image/png" />
+  <link rel="stylesheet" href="style.css" />
+  <meta name="theme-color" content="#14B8A6" />
+  <style>
+    html,body{height:100%;margin:0}
+    body.page-onboarding{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#07132a 0%, #042233 45%, #063246 100%);color:#F0FAFF;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+
+    .celebration-hero{flex:1;display:flex;align-items:center;justify-content:center;padding:1.25rem;position:relative;overflow:hidden}
+
+    .celebration-visual{width:88%;max-width:520px;border-radius:20px;padding:1rem;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));box-shadow:0 40px 120px rgba(2,6,23,0.6);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.04);display:grid;place-items:center}
+    .celebration-visual img{width:100%;height:auto;border-radius:14px}
+
+    .badge-cluster{position:absolute;right:6%;bottom:18%;display:flex;flex-direction:column;gap:.5rem;pointer-events:none}
+    .badge{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#fff,#fff);display:grid;place-items:center;font-size:1.1rem;box-shadow:0 12px 36px rgba(2,6,23,0.45)}
+
+    .glass-card{width:92%;max-width:560px;background:rgba(255,255,255,0.04);border-radius:18px;padding:1rem;border:1px solid rgba(255,255,255,0.04);backdrop-filter:blur(8px);box-shadow:0 18px 48px rgba(2,6,23,0.55);text-align:center;margin-top:1rem}
+    .glass-title{font-size:clamp(1.8rem,6vw,2.6rem);margin:0;font-weight:900}
+    .glass-desc{color:rgba(240,250,255,0.88);margin:0.6rem 0 0}
+
+    .progress-dots{display:flex;gap:.5rem;align-items:center;justify-content:center;margin-top:.9rem}
+    .dot{width:10px;height:10px;border-radius:999px;background:rgba(255,255,255,0.12)}
+    .dot.active{background:linear-gradient(135deg,var(--primary),var(--accent));width:12px;height:12px;transform:scale(1.05)}
+
+    .bottom-cta{position:fixed;left:0;right:0;bottom:0;padding:.9rem 1rem;background:linear-gradient(180deg,rgba(2,6,23,0.02),rgba(2,6,23,0.06));backdrop-filter:blur(8px);display:flex;gap:.6rem;justify-content:center;border-top:1px solid rgba(255,255,255,0.03)}
+
+    /* Confetti pieces */
+    .confetti-piece{position:fixed;width:10px;height:16px;opacity:0.95;border-radius:2px;z-index:9999;pointer-events:none}
+    @keyframes confettiFall{0%{transform:translateY(-10vh) rotate(0deg)}100%{transform:translateY(110vh) rotate(720deg)}}
+
+    .reveal{opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.9,.3,1)}
+    .reveal.active{opacity:1;transform:translateY(0)}
+
+    @media(min-width:900px){.badge-cluster{right:10%;bottom:22%}.bottom-cta{display:none}}
+  </style>
+</head>
+<body class="page-onboarding">
+  <main class="celebration-hero">
+    <div class="celebration-visual reveal">
+      <img src="assets/illustrations/train img.png" alt="Celebration illustration" />
+    </div>
+
+    <div class="badge-cluster" aria-hidden="true">
+      <div class="badge">🏅</div>
+      <div class="badge">🎖️</div>
+      <div class="badge">🏆</div>
+    </div>
+
+    <div class="glass-card reveal" role="region" aria-label="Become your best self">
+      <h1 class="glass-title">Open your daily space</h1>
+      <p class="glass-desc">Your page is ready for simple check-ins, steady progress, and a calm view of the day.</p>
+
+      <div class="progress-dots" aria-hidden="true">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot active"></span>
+      </div>
+    </div>
+  </main>
+
+  <div class="bottom-cta">
+    <button id="skip-onboarding" class="btn btn-ghost">Skip</button>
+    <button id="onboarding-next" class="btn btn-primary">Start Journey</button>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // reveal animation
+    document.querySelectorAll('.reveal').forEach((el,i)=> setTimeout(()=> el.classList.add('active'), 120 + i*80));
+
+    // simple confetti generator
+    (function fireConfetti(){
+      const colors = ['#14B8A6','#0EA5E9','#8B5CF6','#22C55E','#F59E0B'];
+      const count = 28;
+      for(let i=0;i<count;i++){
+        const c = document.createElement('div');
+        c.className = 'confetti-piece';
+        c.style.background = colors[i % colors.length];
+        c.style.left = Math.random()*100 + 'vw';
+        c.style.top = (-5 - Math.random()*10) + 'vh';
+        c.style.width = (8 + Math.random()*8) + 'px';
+        c.style.height = (10 + Math.random()*14) + 'px';
+        c.style.opacity = 0.9;
+        const delay = Math.random()*400;
+        c.style.transform = 'translateY(0)';
+        c.style.animation = `confettiFall ${2.4 + Math.random()*1.6}s ${0.05*i}s cubic-bezier(.2,.7,.3,1) forwards`;
+        document.body.appendChild(c);
+        setTimeout(()=> c.remove(), 4200);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Continue to your space</title>
+  <meta name="description" content="Continue to your personal daily space with a simple sign-in step." />
+  <link rel="icon" href="image/train img.png" type="image/png" />
+  <link rel="stylesheet" href="style.css" />
+  <meta name="theme-color" content="#14B8A6" />
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body.page-login {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: linear-gradient(135deg, #ff5d7a 0%, #ffb347 35%, #3ec5ff 70%, #7c4dff 100%);
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: #ffffff;
+    }
+    .auth-card {
+      width: min(100%, 520px);
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 24px;
+      padding: 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      box-shadow: 0 30px 80px rgba(32, 18, 58, 0.26);
+      backdrop-filter: blur(18px);
+    }
+    .auth-header { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1rem; }
+    .eyebrow { display: inline-block; color: white; background: rgba(255, 255, 255, 0.16); padding: .4rem .8rem; border-radius: 999px; font-weight: 800; }
+    h1 { margin: .25rem 0; font-size: clamp(1.4rem, 5vw, 2rem); line-height: 1.05; }
+    .lead { color: rgba(255, 255, 255, 0.9); margin: 0 0 .6rem; }
+    .auth-form { display: flex; flex-direction: column; gap: .85rem; }
+    .form-floating input { width: 100%; padding: 1rem; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.16); color: inherit; }
+    .form-floating label { left: 1rem; top: .95rem; color: rgba(255,255,255,0.8); }
+    .auth-actions { display: flex; gap: .6rem; flex-direction: column; }
+    .social-row { display: flex; gap: .6rem; flex-direction: column; }
+    .social-btn { display: flex; align-items: center; gap: .75rem; justify-content: center; padding: .9rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.14); cursor: pointer; color: white; }
+    .social-google { background: linear-gradient(90deg, #ffffff 0%, rgba(255,255,255,0.16) 100%); color: #20123a; }
+    .social-apple { background: linear-gradient(90deg, #111111 0%, #2b2b2b 100%); color: #ffffff; }
+    .terms { font-size: .9rem; color: rgba(255,255,255,0.86); display: flex; gap: .4rem; align-items: center; }
+    .terms a { color: #fff4b2; text-decoration: underline; }
+    .otp-row { display: flex; gap: .6rem; align-items: center; }
+    .hidden { display: none !important; }
+    .anim-entrance { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s cubic-bezier(.2,.9,.3,1); }
+    .anim-entrance.active { opacity: 1; transform: translateY(0); }
+    @media (min-width: 900px) { .auth-card { padding: 2rem; } }
+  </style>
+</head>
+<body class="page-login">
+  <main style="width:100%;display:flex;align-items:center;justify-content:center;padding:1rem;">
+    <section class="auth-card anim-entrance" id="authCard">
+      <div class="auth-header">
+        <div>
+          <p class="eyebrow">Welcome</p>
+          <h1>Continue to your space</h1>
+          <p class="lead">Use your email to open a simple view of your habits and daily activity.</p>
+        </div>
+      </div>
+
+      <form id="login-form" class="auth-form">
+        <div class="form-floating">
+          <input type="email" id="email" placeholder="" required autocomplete="email">
+          <label for="email">Email address</label>
+        </div>
+
+        <div id="otp-section" class="hidden">
+          <p id="otp-sent-message" class="form-note">Enter the code sent to your email.</p>
+          <div class="form-floating">
+            <input type="text" id="otp-code" placeholder="" inputmode="numeric" maxlength="6">
+            <label for="otp-code">One-time code</label>
+          </div>
+          <div class="auth-actions">
+            <div style="display:flex;gap:.6rem;">
+              <button type="button" id="verify-otp-btn" class="btn btn-primary" style="flex:1">Verify code</button>
+              <button type="button" id="resend-otp-btn" class="btn btn-ghost" style="flex:1">Resend</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="auth-actions">
+          <button type="submit" class="btn btn-primary" style="padding:.95rem;border-radius:12px;font-weight:800">Continue</button>
+        </div>
+
+        <div style="height:8px"></div>
+
+        <div class="social-row">
+          <button type="button" id="google-signin" class="social-btn social-google">▶ Continue with Google</button>
+          <button type="button" id="apple-signin" class="social-btn social-apple"> Continue with Apple</button>
+        </div>
+      </form>
+
+      <div style="margin-top:1rem;text-align:center;color:rgba(234,244,255,0.8)">
+        <p style="margin:0">A quick sign-in opens your daily view and keeps your routine simple.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    // entrance animation
+    document.addEventListener('DOMContentLoaded', ()=> setTimeout(()=> document.getElementById('authCard')?.classList.add('active'), 80));
+  </script>
+</body>
+</html>

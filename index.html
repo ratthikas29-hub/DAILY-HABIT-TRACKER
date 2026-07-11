@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily activity tracker</title>
+  <script>
+    if (window.location.pathname === '/' || window.location.pathname.endsWith('/index.html')) {
+      window.location.replace('splash.html');
+    }
+  </script>
+  <meta name="description" content="HabitFlow helps you build better routines with beautiful analytics, streaks, and habit tracking.">
+  <link rel="icon" href="image/train img.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#14B8A6">
+  <style>
+    .tracker-card {background:var(--card-bg);border:1px solid var(--glass-border);border-radius:16px;padding:1.1rem;box-shadow:var(--shadow-soft);display:grid;gap:.95rem;}
+    .tracker-card .habit-head {display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;}
+    .tracker-card h3 {margin:0;font-size:1.05rem;color:var(--text);line-height:1.2;}
+    .habit-status {margin:.4rem 0 0;color:var(--text-secondary);font-size:.95rem;}
+    .tracker-card .habit-track {display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:center;}
+    .completion-ring {position:relative;width:86px;height:86px;flex-shrink:0;}
+    .completion-ring svg {transform:rotate(-90deg);width:100%;height:100%;}
+    .completion-ring circle {fill:none;stroke-width:10;stroke-linecap:round;}
+    .ring-bg {stroke:rgba(2,6,23,0.06);}
+    .ring-fill {stroke:var(--primary);stroke-dasharray:283;stroke-dashoffset:283;transition:stroke-dashoffset .5s ease;}
+    .ring-label {position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:700;color:var(--text);}
+    .habit-meta {display:grid;gap:.65rem;font-size:.9rem;color:var(--text-secondary);}
+    .habit-meta strong {display:block;font-size:1.05rem;color:var(--text);margin-top:.2rem;}
+    .toggle-complete {background:linear-gradient(135deg,var(--primary),var(--secondary));color:var(--white);border:none;padding:.7rem .95rem;border-radius:12px;font-weight:700;cursor:pointer;transition:transform .18s ease,background .18s ease;}
+    .toggle-complete:hover {transform:translateY(-1px) scale(1.02);}
+    .toggle-complete.active {background:linear-gradient(135deg,var(--primary),var(--secondary)); box-shadow:0 12px 30px rgba(20,184,166,0.08);}
+    .habit-track .status-pill {display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .65rem;border-radius:999px;background:rgba(2,6,23,0.04);color:var(--text-secondary);font-size:.85rem;font-weight:600;}
+    .habit-track .status-pill.completed {background:rgba(34,197,94,0.12);color:var(--text);}
+    .habit-track .status-pill.pending {background:rgba(248,113,113,0.08);color:var(--text);}
+    .stats-grid {margin-top:1.25rem;}
+    .tracker-card .progress-row {display:flex;gap:1rem;align-items:center;justify-content:space-between;}
+    @media (max-width:640px) {.tracker-card{padding:1rem;}.tracker-card .habit-track{grid-template-columns:1fr;}.habit-meta{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body class="page-home">
+  <!-- Top navbar removed in favor of fixed bottom navigation (glassmorphism) -->
+
+  <div id="app-shell"></div>
+  <main class="page-shell" id="page-target">
+    <section class="hero section-card section-card--hero">
+      <div class="hero-copy reveal anim-fade-scale shimmer delay-1">
+        <div class="eyebrow">A fresh start</div>
+        <h1>A simple way to monitor your daily activity.</h1>
+        <p>Open a clear space for habits, check-ins, and a calm view of your day.</p>
+        <div class="hero-actions">
+          <button id="start-tracking-btn" class="btn btn-primary">Start Tracking</button>
+          <button class="btn btn-secondary">Explore Features</button>
+        </div>
+        <div class="quick-actions">
+          <a href="habits.html" class="quick-action"><strong>New habit</strong><span>Plan today</span></a>
+          <a href="health-metrics.html" class="quick-action"><strong>Health</strong><span>Track metrics</span></a>
+          <a href="mood-tracker.html" class="quick-action"><strong>Mood</strong><span>Check in</span></a>
+        </div>
+      </div>
+      <div class="hero-visual reveal anim-slide-left delay-2">
+        <div class="icon-bubbles">
+          <div class="icon-bubble float-slight">💧</div>
+          <div class="icon-bubble float-slight">🏃</div>
+          <div class="icon-bubble float-slight">📚</div>
+          <div class="icon-bubble float-slight">🧘</div>
+        </div>
+        <img src="assets/illustrations/train img.png" alt="Premium habit tracking illustration">
+      </div>
+    </section>
+    <section id="dynamic-section" class="anim-fade-up delay-3 app-shell">
+      <!-- content injected by script: empty state or user data -->
+    </section>
+  </main>
+
+  <script src="habits-data.js"></script>
+  <script>
+    // Dynamic homepage renderer: shows empty state for new users or real user data
+    document.addEventListener('DOMContentLoaded', function () {
+      const container = document.getElementById('dynamic-section');
+      if (!container) return;
+
+      const userHabits = (typeof getUserHabits === 'function') ? getUserHabits() : (JSON.parse(localStorage.getItem('userHabits')) || []);
+
+      function createEmptyState() {
+        container.innerHTML = `
+          <div class="section-card" style="text-align:center;max-width:760px;margin:1.25rem auto;">
+            <img src="assets/illustrations/train img.png" alt="Welcome illustration" style="max-width:240px;width:48%;margin:0 auto 1rem;display:block;filter:drop-shadow(0 18px 40px rgba(2,6,23,0.6));"/>
+            <h2 style="margin:.25rem 0;font-size:1.6rem;color:var(--text)">Your space is ready</h2>
+            <p style="color:var(--text-secondary);margin:.5rem 0 1rem;">Add one habit and begin tracking your day in a calm, simple way.</p>
+            <p style="color:var(--text-secondary);margin:0 0 1rem">Your daily routine starts here.</p>
+            <div style="display:flex;gap:.6rem;justify-content:center;margin-top:1rem">
+              <button id="create-first-habit-btn" class="btn btn-primary" style="padding:.85rem 1.25rem;border-radius:12px;font-weight:700">Create Your First Habit</button>
+            </div>
+          </div>
+        `;
+
+        const btn = document.getElementById('create-first-habit-btn');
+        if (btn) btn.addEventListener('click', () => { window.location.href = 'habits.html'; });
+      }
+
+      function createStatsAndHabits(habits) {
+        const streak = (typeof getCurrentStreak === 'function') ? getCurrentStreak() : parseInt(localStorage.getItem('currentStreak')) || 0;
+        const badges = (typeof getUserBadges === 'function') ? getUserBadges() : (JSON.parse(localStorage.getItem('userBadges')) || []);
+
+        function getHabitStreak(habitId) {
+          let count = 0;
+          const date = new Date();
+          while (true) {
+            if ((typeof isHabitCompleted === 'function' ? isHabitCompleted(habitId, date.toDateString()) : false)) {
+              count += 1;
+              date.setDate(date.getDate() - 1);
+            } else {
+              break;
+            }
+          }
+          return count;
+        }
+
+        function getHabitCompletionPercent(habitId) {
+          let completed = 0;
+          const today = new Date();
+          for (let i = 0; i < 7; i++) {
+            const day = new Date(today);
+            day.setDate(today.getDate() - i);
+            if (typeof isHabitCompleted === 'function' ? isHabitCompleted(habitId, day.toDateString()) : false) {
+              completed += 1;
+            }
+          }
+          return Math.round((completed / 7) * 100);
+        }
+
+        function renderCards() {
+          const overallCount = habits.length;
+          let totalCompleted = 0;
+          let statsHtml = `<div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin:1rem 0">`;
+          statsHtml += `<article class="stat-card"><h3>Streak</h3><div class="stat-number">${streak}</div><div class="stat-highlight">Days in a row</div></article>`;
+          const weeklyScore = (() => {
+            let completed = 0;
+            const today = new Date();
+            for (let i = 0; i < 7; i++) {
+              const day = new Date(today);
+              day.setDate(today.getDate() - i);
+              const dayStr = day.toDateString();
+              const daily = (JSON.parse(localStorage.getItem('habitCompletions')) || {})[dayStr] || [];
+              completed += daily.length;
+            }
+            const totalPossible = overallCount * 7;
+            return totalPossible ? Math.round((completed / totalPossible) * 100) : null;
+          })();
+          if (weeklyScore !== null) {
+            statsHtml += `<article class="stat-card"><h3>Weekly Score</h3><div class="stat-number">${weeklyScore}</div><div class="stat-highlight">Consistency index</div></article>`;
+          }
+          statsHtml += `<article class="stat-card"><h3>Active Habits</h3><div class="stat-number">${overallCount}</div><div class="stat-highlight">Personal habits</div></article>`;
+          statsHtml += `<article class="stat-card"><h3>Achievements</h3><div class="stat-number">${badges.length}</div><div class="stat-highlight">Badges earned</div></article>`;
+          statsHtml += `</div>`;
+
+          let habitsHtml = `<section class="habits-grid">`;
+          habits.forEach(habit => {
+            const completedToday = typeof isHabitCompleted === 'function' ? isHabitCompleted(habit.id) : false;
+            const streakCount = getHabitStreak(habit.id);
+            const completePercent = getHabitCompletionPercent(habit.id);
+            if (completedToday) totalCompleted += 1;
+            const ringOffset = 283 - (283 * completePercent / 100);
+            const statusClass = completedToday ? 'completed' : 'pending';
+            const actionLabel = completedToday ? 'Undo' : 'Mark Complete';
+
+            habitsHtml += `
+              <article class="habit-card tracker-card" data-id="${habit.id}">
+                <div class="habit-head">
+                  <div>
+                    <h3>${habit.name}</h3>
+                    <div class="habit-status">Today: <span class="status-pill ${statusClass}">${completedToday ? 'Completed' : 'Not completed'}</span></div>
+                  </div>
+                  <button class="toggle-complete ${completedToday ? 'active' : ''}" data-habit="${habit.id}">${actionLabel}</button>
+                </div>
+                <div class="habit-track">
+                  <div class="completion-ring" aria-label="${completePercent}% weekly completion">
+                    <svg viewBox="0 0 100 100" role="img">
+                      <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
+                      <circle class="ring-fill" cx="50" cy="50" r="45" style="stroke-dashoffset:${ringOffset}"></circle>
+                    </svg>
+                    <div class="ring-label">${completePercent}%</div>
+                  </div>
+                  <div class="habit-meta">
+                    <div><span>Current streak</span><strong>${streakCount} Day${streakCount === 1 ? '' : 's'}</strong></div>
+                    <div><span>Completion</span><strong>${completePercent}%</strong></div>
+                  </div>
+                </div>
+              </article>
+            `;
+          });
+          habitsHtml += `</section>`;
+
+          container.innerHTML = `
+            <div class="app-shell">
+              <div class="section-card">
+                <div class="section-title">
+                  <div>
+                    <h3>Your overview</h3>
+                    <p>A calm snapshot of your momentum today.</p>
+                  </div>
+                  <span class="chip">Live</span>
+                </div>
+                ${statsHtml}
+              </div>
+              <div class="section-card">
+                <div class="section-title">
+                  <div>
+                    <h3>Today’s habits</h3>
+                    <p>Tap a card to mark progress and keep the streak alive.</p>
+                  </div>
+                </div>
+                ${habitsHtml}
+              </div>
+            </div>
+          `;
+
+          container.querySelectorAll('.toggle-complete').forEach(button => {
+            button.addEventListener('click', () => {
+              const habitId = button.dataset.habit;
+              toggleHabitCompletion(habitId);
+            });
+          });
+        }
+
+        function toggleHabitCompletion(habitId) {
+          const today = new Date().toDateString();
+          const completions = JSON.parse(localStorage.getItem('habitCompletions') || '{}');
+          const todayList = completions[today] || [];
+          const isComplete = todayList.includes(habitId);
+          if (isComplete) {
+            completions[today] = todayList.filter(id => id !== habitId);
+          } else {
+            completions[today] = [...new Set([...todayList, habitId])];
+          }
+          localStorage.setItem('habitCompletions', JSON.stringify(completions));
+          if (typeof updateStreak === 'function') updateStreak();
+          if (typeof checkAchievements === 'function') checkAchievements();
+          renderCards();
+        }
+
+        renderCards();
+      }
+
+      // Render
+      if (!userHabits || userHabits.length === 0) {
+        createEmptyState();
+      } else {
+        createStatsAndHabits(userHabits);
+      }
+    });
+  </script>
+
+  <section class="anim-fade-up delay-4" style="margin-top:1.2rem;">
+    <div class="glass-card" style="padding:1.1rem;border-radius:18px;">
+      <div class="eyebrow">Wellness hub</div>
+      <h2 style="margin:.4rem 0 .35rem;font-size:1.35rem;">Your health tools, all in one place</h2>
+      <p style="margin:0 0 1rem;color:var(--text-secondary);">Continue your morning routine, open your coach, or adjust settings.</p>
+      <div class="quick-link-list">
+        <a href="habits.html">Habits</a>
+        <a href="health-metrics.html">Health</a>
+        <a href="mood-tracker.html">Mood</a>
+        <a href="progress.html">Statistics</a>
+        <a href="ai-coach.html">AI coach</a>
+        <a href="settings.html">Settings</a>
+      </div>
+    </div>
+  </section>
+
+  <script src="src/app/app-shell.js"></script>
+  <script src="src/app/shell-loader.js"></script>
+  <script src="src/app/router.js"></script>
+  <script src="src/pages/home/home-page.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
