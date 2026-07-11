@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mood Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#14B8A6">
+</head>
+<body class="page-mood">
+  <main class="page-shell">
+    <section class="section-card anim-fade-up">
+      <div class="section-title">
+        <div>
+          <h2>Daily mood check-in</h2>
+          <p>Notice how your energy feels and keep your wellness routine grounded.</p>
+        </div>
+      </div>
+      <form id="mood-form" class="app-shell">
+        <div class="section-card">
+          <div class="hero-actions" style="margin-bottom:1rem;">
+            <button type="button" class="btn btn-secondary mood-option" data-mood="Calm">Calm</button>
+            <button type="button" class="btn btn-secondary mood-option" data-mood="Energetic">Energetic</button>
+            <button type="button" class="btn btn-secondary mood-option" data-mood="Focused">Focused</button>
+            <button type="button" class="btn btn-secondary mood-option" data-mood="Tired">Tired</button>
+          </div>
+          <div class="form-floating">
+            <textarea id="mood-note" placeholder="Write a few words about your day..."></textarea>
+            <label for="mood-note">Short note</label>
+          </div>
+          <button class="btn btn-primary" type="submit" style="margin-top:1rem;">Save check-in</button>
+        </div>
+      </form>
+      <div id="mood-summary" class="section-card" style="margin-top:1rem;"></div>
+      <div id="mood-history" class="app-shell" style="margin-top:1rem;"></div>
+    </section>
+  </main>
+  <script src="habits-data.js"></script>
+  <script src="app.js"></script>
+  <script src="mood-tracker.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "HabitFlow",
+  "short_name": "HabitFlow",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff7fb",
+  "theme_color": "#14B8A6",
+  "icons": []
+}

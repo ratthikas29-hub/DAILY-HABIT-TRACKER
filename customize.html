@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customize</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#14B8A6">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="section-card anim-fade-up">
+      <div class="section-title">
+        <div>
+          <h2>Customize your routine</h2>
+          <p>Add your own habits and keep your tracker personal.</p>
+        </div>
+      </div>
+      <form id="custom-habit-form" class="section-card" style="margin-bottom:1rem;">
+        <div class="form-floating" style="margin-bottom:0.7rem;">
+          <input id="custom-habit-name" placeholder="" required>
+          <label for="custom-habit-name">Habit name</label>
+        </div>
+        <div class="form-floating" style="margin-bottom:0.7rem;">
+          <textarea id="custom-habit-description" placeholder=""></textarea>
+          <label for="custom-habit-description">Why it matters</label>
+        </div>
+        <button class="btn btn-primary" type="submit">Add custom habit</button>
+      </form>
+      <div id="custom-list" class="app-shell"></div>
+    </section>
+  </main>
+  <script src="habits-data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('custom-habit-form');
+      const list = document.getElementById('custom-list');
+      function loadCustomHabits() {
+        try { return JSON.parse(localStorage.getItem('habitflow-custom-habits') || '[]'); }
+        catch (error) { return []; }
+      }
+      function saveCustomHabits(items) { localStorage.setItem('habitflow-custom-habits', JSON.stringify(items)); }
+      function render() {
+        const habits = loadCustomHabits();
+        if (!habits.length) {
+          list.innerHTML = '<div class="section-card">No custom habits yet. Create one to personalize your routine.</div>';
+          return;
+        }
+        list.innerHTML = habits.map((habit, index) => `
+          <div class="section-card">
+            <div class="section-title">
+              <div>
+                <h3>${habit.name}</h3>
+                <p>${habit.description || 'A personal habit to keep your routine moving.'}</p>
+              </div>
+              <button class="btn btn-secondary" type="button" data-index="${index}">Remove</button>
+            </div>
+          </div>
+        `).join('');
+      }
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const name = document.getElementById('custom-habit-name').value.trim();
+        if (!name) return;
+        const description = document.getElementById('custom-habit-description').value.trim();
+        const habits = loadCustomHabits();
+        habits.unshift({ id: `custom-${Date.now()}`, name, description, category: 'custom', icon: '✨' });
+        saveCustomHabits(habits);
+        render();
+        form.reset();
+      });
+      list.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-index]');
+        if (!button) return;
+        const habits = loadCustomHabits();
+        habits.splice(Number(button.dataset.index), 1);
+        saveCustomHabits(habits);
+        render();
+      });
+      render();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#14B8A6">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="section-card anim-fade-up">
+      <div class="section-title">
+        <div>
+          <h2>Profile & dashboard</h2>
+          <p>Your progress, streaks, and wellness snapshot in one clear view.</p>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <article class="stat-card"><h3>Current streak</h3><div class="stat-number" id="dash-streak">0</div><div class="stat-highlight">Days in a row</div></article>
+        <article class="stat-card"><h3>Badges</h3><div class="stat-number" id="dash-badges">0</div><div class="stat-highlight">Achievements unlocked</div></article>
+        <article class="stat-card"><h3>Habits tracked</h3><div class="stat-number" id="dash-habits">0</div><div class="stat-highlight">Personal routine</div></article>
+      </div>
+      <div class="section-card" style="margin-top:1rem">
+        <h3>Today’s momentum</h3>
+        <p id="dash-summary">Your layout is ready and your routine is waiting for action.</p>
+      </div>
+    </section>
+  </main>
+  <script src="habits-data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const streak = (typeof getCurrentStreak === 'function') ? getCurrentStreak() : 0;
+      const badges = (typeof getUserBadges === 'function') ? getUserBadges() : [];
+      const habits = (typeof getUserHabits === 'function') ? getUserHabits() : [];
+      document.getElementById('dash-streak').textContent = streak;
+      document.getElementById('dash-badges').textContent = badges.length;
+      document.getElementById('dash-habits').textContent = habits.length;
+      document.getElementById('dash-summary').textContent = habits.length ? 'You have a live routine ready to keep going.' : 'Start by adding your first habit and building momentum.';
+    });
+  </script>
+</body>
+</html>

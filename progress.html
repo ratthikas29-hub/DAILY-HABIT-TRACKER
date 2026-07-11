@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#14B8A6">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="section-card anim-fade-up">
+      <div class="section-title">
+        <div>
+          <h2>Progress overview</h2>
+          <p>See your consistency, streak strength, and recent momentum.</p>
+        </div>
+        <span class="chip">Updated</span>
+      </div>
+      <div class="stats-grid">
+        <article class="stat-card"><h3>Streak</h3><div class="stat-number" id="progress-streak">0</div><div class="stat-highlight">Days in a row</div></article>
+        <article class="stat-card"><h3>Completed</h3><div class="stat-number" id="progress-completed">0</div><div class="stat-highlight">Habits today</div></article>
+        <article class="stat-card"><h3>Score</h3><div class="stat-number" id="progress-score">0%</div><div class="stat-highlight">Consistency</div></article>
+        <article class="stat-card"><h3>Badges</h3><div class="stat-number" id="progress-badges">0</div><div class="stat-highlight">Milestones</div></article>
+      </div>
+      <div class="section-card" style="margin-top:1rem;">
+        <h3>Weekly rhythm</h3>
+        <div class="app-shell">
+          <div class="progress-bar"><span data-value="78"></span></div>
+          <div class="progress-bar"><span data-value="66"></span></div>
+          <div class="progress-bar"><span data-value="88"></span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="habits-data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const report = (typeof getDailyReport === 'function') ? getDailyReport() : { completed: 0, score: 0 };
+      document.getElementById('progress-streak').textContent = (typeof getCurrentStreak === 'function') ? getCurrentStreak() : 0;
+      document.getElementById('progress-completed').textContent = report.completed || 0;
+      document.getElementById('progress-score').textContent = `${report.score || 0}%`;
+      document.getElementById('progress-badges').textContent = ((typeof getUserBadges === 'function') ? getUserBadges() : []).length;
+      document.querySelectorAll('.progress-bar span').forEach(bar => {
+        const value = bar.dataset.value || '0';
+        bar.style.width = `${value}%`;
+      });
+    });
+  </script>
+</body>
+</html>
